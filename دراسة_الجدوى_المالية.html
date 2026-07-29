@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أداة دراسة الجدوى المالية</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --ink:#12203B;
+  --ink-2:#1B2E52;
+  --paper:#F6F2E8;
+  --paper-2:#EEE7D6;
+  --line:#D9CFB4;
+  --gold:#C9A24B;
+  --gold-2:#E4C374;
+  --teal:#2C6357;
+  --teal-2:#3E8874;
+  --rust:#AE4A3A;
+  --text:#241F14;
+  --muted:#6B6252;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:'IBM Plex Sans Arabic', sans-serif;
+  min-height:100vh;
+}
+.num{font-family:'IBM Plex Mono','IBM Plex Sans Arabic',monospace; direction:ltr; unicode-bidi:isolate;}
+h1,h2,h3,.display{font-family:'Markazi Text','IBM Plex Sans Arabic',serif;}
+
+/* ===== HERO ===== */
+.hero{
+  position:relative;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(201,162,75,0.18), transparent 45%),
+    linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+  color:var(--paper);
+  padding:36px 28px 44px;
+  overflow:hidden;
+  border-bottom:3px solid var(--gold);
+}
+.hero-eyebrow{
+  font-family:'IBM Plex Mono';
+  font-size:12px;
+  letter-spacing:.18em;
+  color:var(--gold-2);
+  text-transform:uppercase;
+}
+.hero h1{
+  font-size:38px;
+  margin:6px 0 4px;
+  font-weight:700;
+  color:#F8F5EC;
+}
+.hero p.sub{
+  margin:0;
+  color:#C9CFDC;
+  font-size:15px;
+  max-width:640px;
+}
+.hero-grid{
+  display:flex;
+  gap:18px;
+  margin-top:26px;
+  flex-wrap:wrap;
+  align-items:stretch;
+}
+.hero-metric{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(228,195,116,0.28);
+  border-radius:4px;
+  padding:14px 18px;
+  min-width:150px;
+  flex:1;
+}
+.hero-metric .lbl{font-size:11px; color:var(--gold-2); letter-spacing:.08em;}
+.hero-metric .val{font-size:24px; font-weight:600; margin-top:4px; color:#F8F5EC;}
+.hero-metric .val.pos{color:#8FD0B8;}
+.hero-metric .val.neg{color:#E4A79A;}
+
+/* GO / NO-GO stamp */
+.stamp{
+  position:absolute;
+  top:34px;
+  left:36px;
+  width:118px;
+  height:118px;
+  border-radius:50%;
+  border:3px double currentColor;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  transform:rotate(-11deg);
+  font-family:'Markazi Text';
+  font-weight:700;
+  font-size:26px;
+  letter-spacing:.06em;
+  opacity:.92;
+  transition:all .3s ease;
+  pointer-events:none;
+}
+.stamp.go{color:#8FD0B8; box-shadow:0 0 0 3px rgba(143,208,184,0.15) inset;}
+.stamp.nogo{color:#E4A79A; box-shadow:0 0 0 3px rgba(228,167,154,0.15) inset;}
+.stamp small{display:block; font-size:11px; font-family:'IBM Plex Mono'; letter-spacing:.1em; margin-top:2px;}
+
+/* ===== TABS ===== */
+.tabs{
+  display:flex;
+  gap:2px;
+  background:var(--ink-2);
+  padding:0 20px;
+  overflow-x:auto;
+}
+.tab-btn{
+  background:transparent;
+  border:none;
+  color:#B6BDD1;
+  font-family:'IBM Plex Sans Arabic';
+  font-size:14px;
+  font-weight:500;
+  padding:14px 18px;
+  cursor:pointer;
+  border-bottom:3px solid transparent;
+  white-space:nowrap;
+  transition:all .15s ease;
+}
+.tab-btn:hover{color:#F0EFEA;}
+.tab-btn.active{color:var(--gold-2); border-bottom-color:var(--gold);}
+
+/* ===== MAIN / PAGES ===== */
+main{
+  background:var(--paper);
+  background-image:repeating-linear-gradient(180deg, transparent 0, transparent 34px, rgba(180,166,120,0.16) 35px);
+  min-height:60vh;
+  padding:30px 26px 60px;
+}
+.panel{display:none; max-width:1180px; margin:0 auto;}
+.panel.active{display:block; animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+.section-title{
+  font-size:22px;
+  font-weight:700;
+  color:var(--ink);
+  margin:0 0 4px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.section-title .dot{width:9px;height:9px;background:var(--gold);border-radius:50%; display:inline-block;}
+.section-desc{color:var(--muted); font-size:13.5px; margin:0 0 22px;}
+
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:22px 24px;
+  margin-bottom:20px;
+  box-shadow:0 1px 2px rgba(20,30,60,0.04);
+}
+.card h3{margin:0 0 16px; font-size:17px; color:var(--ink); font-weight:600; border-bottom:1px solid var(--paper-2); padding-bottom:10px;}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px 20px;}
+.field label{
+  display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; font-weight:500;
+}
+.field input, .field select{
+  width:100%;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  font-family:'IBM Plex Mono';
+  font-size:14px;
+  background:#FCFAF4;
+  color:var(--text);
+  direction:ltr;
+  text-align:right;
+}
+.field select{direction:rtl; text-align:right; font-family:'IBM Plex Sans Arabic';}
+.field input:focus, .field select:focus{outline:2px solid var(--gold); outline-offset:1px; background:#fff;}
+.field .hint{font-size:11px; color:#9C927C; margin-top:4px;}
+
+/* tables */
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:6px;}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:640px;}
+table th, table td{padding:8px 12px; text-align:left; white-space:nowrap; border-bottom:1px solid var(--paper-2);}
+table th{background:var(--ink); color:#EDE7D6; font-weight:600; position:sticky; top:0; text-align:right;}
+table td:first-child, table th:first-child{position:sticky; right:0; background:#fff; text-align:right; font-weight:600; z-index:1;}
+table th:first-child{background:var(--ink); z-index:2;}
+table tr.total td{font-weight:700; background:var(--paper-2);}
+table tr.sub td{color:var(--muted);}
+table td.num, table th.num{font-family:'IBM Plex Mono'; direction:ltr; text-align:left;}
+
+.btn{
+  background:var(--ink);
+  color:#F1EEE3;
+  border:none;
+  padding:9px 16px;
+  border-radius:4px;
+  font-family:'IBM Plex Sans Arabic';
+  font-size:13.5px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .15s;
+}
+.btn:hover{background:var(--ink-2);}
+.btn.ghost{background:transparent; color:var(--rust); border:1px solid var(--rust);}
+.btn.ghost:hover{background:rgba(174,74,58,0.08);}
+.btn.gold{background:var(--gold); color:var(--ink);}
+.btn.gold:hover{background:var(--gold-2);}
+
+.capex-row{
+  display:grid;
+  grid-template-columns:1.6fr 0.7fr 1fr 0.8fr 0.9fr 0.6fr;
+  gap:10px;
+  align-items:end;
+  padding:12px 0;
+  border-bottom:1px dashed var(--line);
+}
+.capex-row:last-of-type{border-bottom:none;}
+.capex-head{
+  display:grid;
+  grid-template-columns:1.6fr 0.7fr 1fr 0.8fr 0.9fr 0.6fr;
+  gap:10px;
+  font-size:11.5px;
+  color:var(--muted);
+  padding-bottom:6px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:4px;
+}
+
+.metric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;}
+.metric-card{
+  background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold);
+  border-radius:4px; padding:16px 18px;
+}
+.metric-card .m-lbl{font-size:12px; color:var(--muted);}
+.metric-card .m-val{font-size:26px; font-weight:700; color:var(--ink); font-family:'IBM Plex Mono'; direction:ltr;}
+.metric-card.pos{border-left-color:var(--teal);}
+.metric-card.neg{border-left-color:var(--rust);}
+.metric-card.pos .m-val{color:var(--teal);}
+.metric-card.neg .m-val{color:var(--rust);}
+
+.chart-wrap{background:#fff; border:1px solid var(--line); border-radius:6px; padding:18px; margin-top:18px;}
+.legend{display:flex; gap:18px; font-size:12px; margin-bottom:8px; flex-wrap:wrap;}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend i{width:12px; height:12px; border-radius:2px; display:inline-block;}
+
+.sens-table td, .sens-table th{text-align:center; padding:10px;}
+.sens-table td.base{outline:2px solid var(--gold); outline-offset:-2px; font-weight:700;}
+
+footer.note{
+  max-width:1180px; margin:20px auto 0; color:var(--muted); font-size:12px; line-height:1.8; padding:0 4px;
+}
+@media (max-width:640px){
+  .hero h1{font-size:28px;}
+  .stamp{width:90px; height:90px; font-size:19px; top:20px; left:20px;}
+  .capex-row, .capex-head{grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="stamp" id="stamp">GO<small>...</small></div>
+  <div class="hero-eyebrow">أداة قرار الاستثمار</div>
+  <h1>دراسة الجدوى المالية</h1>
+  <p class="sub">نموذج مالي عام وفارغ — أدخل بيانات مشروعك الخاص (الإنفاق الرأسمالي، الإيرادات، التكاليف) وسيقوم النموذج تلقائيًا ببناء القوائم المالية وحساب صافي القيمة الحالية ومعدل العائد الداخلي وفترة الاسترداد.</p>
+  <div class="hero-grid">
+    <div class="hero-metric"><div class="lbl">صافي القيمة الحالية NPV</div><div class="val num" id="hero-npv">0</div></div>
+    <div class="hero-metric"><div class="lbl">معدل العائد الداخلي IRR</div><div class="val num" id="hero-irr">—</div></div>
+    <div class="hero-metric"><div class="lbl">فترة الاسترداد</div><div class="val num" id="hero-payback">—</div></div>
+    <div class="hero-metric"><div class="lbl">إجمالي الإيرادات المتوقعة</div><div class="val num" id="hero-rev">0</div></div>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="setup">١. بيانات المشروع</button>
+  <button class="tab-btn" data-tab="capex">٢. الإنفاق الرأسمالي</button>
+  <button class="tab-btn" data-tab="oper">٣. الإيرادات والتكاليف</button>
+  <button class="tab-btn" data-tab="fin">٤. القوائم المالية</button>
+  <button class="tab-btn" data-tab="assess">٥. التقييم والجدوى</button>
+  <button class="tab-btn" data-tab="sens">٦. تحليل الحساسية</button>
+</nav>
+
+<main>
+
+  <!-- ===================== TAB 1: SETUP ===================== -->
+  <section class="panel active" id="tab-setup">
+    <h2 class="section-title"><span class="dot"></span>بيانات المشروع الأساسية</h2>
+    <p class="section-desc">عرّف المشروع وافتراضات التقييم العامة. كل الحقول قابلة للتعديل ولا تحتوي على أي بيانات مسبقة.</p>
+
+    <div class="card">
+      <h3>معلومات عامة</h3>
+      <div class="grid">
+        <div class="field"><label>اسم المشروع</label><input id="in-name" type="text" placeholder="مثال: مشروع كذا"></div>
+        <div class="field"><label>الجهة الطالبة</label><input id="in-req" type="text" placeholder="اختياري"></div>
+        <div class="field"><label>الإدارة</label><input id="in-dept" type="text" placeholder="اختياري"></div>
+        <div class="field"><label>العملة</label><input id="in-currency" type="text" value="SAR"></div>
+        <div class="field"><label>سنة بداية المشروع</label><input id="in-startyear" type="number" value="2026"></div>
+        <div class="field"><label>عدد سنوات التوقع</label><input id="in-years" type="number" value="5" min="1" max="10"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>معدلات التقييم</h3>
+      <div class="grid">
+        <div class="field"><label>تكلفة رأس المال المرجحة WACC (%)</label><input id="in-wacc" type="number" value="10" step="0.1"></div>
+        <div class="field"><label>علاوة مخاطر إضافية (%)</label><input id="in-risk" type="number" value="0" step="0.1"><div class="hint">تُضاف إلى WACC لتكوين معدل الخصم</div></div>
+        <div class="field"><label>نسبة الزكاة (%)</label><input id="in-zakat" type="number" value="2.5" step="0.1"></div>
+        <div class="field"><label>معدل النمو الأبدي (%)</label><input id="in-growth" type="number" value="2" step="0.1"><div class="hint">لحساب القيمة النهائية Terminal Value</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>افتراضات رأس المال العامل</h3>
+      <div class="grid">
+        <div class="field"><label>أيام تحصيل الذمم المدينة (A/R)</label><input id="in-ar" type="number" value="30"></div>
+        <div class="field"><label>أيام سداد الذمم الدائنة (A/P)</label><input id="in-ap" type="number" value="30"></div>
+        <div class="field"><label>أيام المخزون</label><input id="in-inv" type="number" value="0"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 2: CAPEX ===================== -->
+  <section class="panel" id="tab-capex">
+    <h2 class="section-title"><span class="dot"></span>الإنفاق الرأسمالي وجدول الإهلاك</h2>
+    <p class="section-desc">أضف بنود الأصول الرأسمالية للمشروع. يُحسب الإهلاك تلقائيًا بطريقة القسط الثابت على مدى العمر الإنتاجي.</p>
+
+    <div class="card">
+      <div class="capex-head">
+        <div>اسم البند</div><div>الكمية</div><div>تكلفة الوحدة</div><div>العمر الإنتاجي (سنة)</div><div>سنة الإضافة</div><div></div>
+      </div>
+      <div id="capex-rows"></div>
+      <div style="margin-top:14px;">
+        <button class="btn gold" id="add-capex">+ إضافة بند رأسمالي</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>جدول إجمالي الإنفاق والإهلاك السنوي</h3>
+      <div class="table-wrap"><table id="tbl-capex"></table></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 3: OPERATING ===================== -->
+  <section class="panel" id="tab-oper">
+    <h2 class="section-title"><span class="dot"></span>افتراضات الإيرادات والتكاليف التشغيلية</h2>
+    <p class="section-desc">حدد محركات الإيرادة (الحجم والسعر) وهيكل التكاليف. النمو مركّب سنويًا.</p>
+
+    <div class="card">
+      <h3>الإيرادات</h3>
+      <div class="grid">
+        <div class="field"><label>الحجم / عدد الوحدات في السنة الأولى</label><input id="in-vol" type="number" value="0"></div>
+        <div class="field"><label>معدل نمو الحجم سنويًا (%)</label><input id="in-volg" type="number" value="0" step="0.1"></div>
+        <div class="field"><label>سعر الوحدة في السنة الأولى</label><input id="in-price" type="number" value="0" step="0.01"></div>
+        <div class="field"><label>معدل نمو السعر سنويًا (%)</label><input id="in-priceg" type="number" value="0" step="0.1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>التكاليف</h3>
+      <div class="grid">
+        <div class="field"><label>تكلفة المبيعات COGS (% من الإيراد)</label><input id="in-cogs" type="number" value="0" step="0.1"></div>
+        <div class="field"><label>مصاريف تشغيلية ثابتة (السنة الأولى)</label><input id="in-opexfix" type="number" value="0"></div>
+        <div class="field"><label>نمو المصاريف الثابتة سنويًا (%)</label><input id="in-opexg" type="number" value="0" step="0.1"></div>
+        <div class="field"><label>مصاريف تشغيلية متغيرة (% من الإيراد)</label><input id="in-opexvar" type="number" value="0" step="0.1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 4: FINANCIALS ===================== -->
+  <section class="panel" id="tab-fin">
+    <h2 class="section-title"><span class="dot"></span>القوائم المالية المجمّعة</h2>
+    <p class="section-desc">تُبنى هذه القوائم تلقائيًا من مدخلات الإنفاق الرأسمالي والإيرادات والتكاليف.</p>
+
+    <div class="card">
+      <h3>قائمة الدخل (بالآلاف)</h3>
+      <div class="table-wrap"><table id="tbl-is"></table></div>
+    </div>
+    <div class="card">
+      <h3>الميزانية المختصرة (بالآلاف)</h3>
+      <div class="table-wrap"><table id="tbl-bs"></table></div>
+    </div>
+    <div class="card">
+      <h3>قائمة التدفقات النقدية المختصرة (بالآلاف)</h3>
+      <div class="table-wrap"><table id="tbl-cf"></table></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 5: ASSESSMENT ===================== -->
+  <section class="panel" id="tab-assess">
+    <h2 class="section-title"><span class="dot"></span>التقييم المالي ومؤشرات الجدوى</h2>
+    <p class="section-desc">مؤشرات القرار النهائية بناءً على التدفقات النقدية الحرة المخصومة.</p>
+
+    <div class="metric-grid" id="metric-grid"></div>
+
+    <div class="chart-wrap">
+      <h3 style="margin-top:0;">الإيراد مقابل EBITDA والتدفق النقدي الحر عبر سنوات المشروع</h3>
+      <div class="legend">
+        <span><i style="background:var(--gold)"></i> الإيراد</span>
+        <span><i style="background:var(--teal)"></i> EBITDA</span>
+        <span><i style="background:var(--rust)"></i> التدفق النقدي الحر</span>
+      </div>
+      <svg id="chart" viewBox="0 0 900 320" style="width:100%; height:auto; font-family:'IBM Plex Mono';"></svg>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3>التدفقات النقدية الحرة وحساب القيمة الحالية</h3>
+      <div class="table-wrap"><table id="tbl-fcf"></table></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 6: SENSITIVITY ===================== -->
+  <section class="panel" id="tab-sens">
+    <h2 class="section-title"><span class="dot"></span>تحليل الحساسية</h2>
+    <p class="section-desc">أثر تغيّر معدل الخصم ونمو حجم الإيرادات على صافي القيمة الحالية (شامل القيمة النهائية).</p>
+    <div class="card">
+      <div class="table-wrap">
+        <table class="sens-table" id="tbl-sens"></table>
+      </div>
+      <p class="hint" style="margin-top:12px; color:var(--muted); font-size:12px;">الصفوف: معدل الخصم (WACC + العلاوة) — الأعمدة: معدل نمو الحجم السنوي. الخلية المحاطة بإطار ذهبي تمثل السيناريو الأساسي المُدخل.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="note">
+  ملاحظة: هذه الأداة نموذج عام لدراسة جدوى مالية مبسّطة (إيرادات، تكاليف، إنفاق رأسمالي، رأس مال عامل، زكاة) ولا تُغني عن مراجعة مالية أو استشارية متخصصة قبل اتخاذ قرار استثماري.
+</footer>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let capexItems = [
+  // start empty — user adds their own items
+];
+let nextCapexId = 1;
+
+function readState(){
+  return {
+    name: document.getElementById('in-name').value || 'مشروع بدون اسم',
+    requester: document.getElementById('in-req').value,
+    dept: document.getElementById('in-dept').value,
+    currency: document.getElementById('in-currency').value || 'SAR',
+    startYear: parseInt(document.getElementById('in-startyear').value) || 2026,
+    years: Math.max(1, Math.min(10, parseInt(document.getElementById('in-years').value) || 5)),
+    wacc: parseFloat(document.getElementById('in-wacc').value) || 0,
+    risk: parseFloat(document.getElementById('in-risk').value) || 0,
+    zakat: parseFloat(document.getElementById('in-zakat').value) || 0,
+    growth: parseFloat(document.getElementById('in-growth').value) || 0,
+    arDays: parseFloat(document.getElementById('in-ar').value) || 0,
+    apDays: parseFloat(document.getElementById('in-ap').value) || 0,
+    invDays: parseFloat(document.getElementById('in-inv').value) || 0,
+    vol: parseFloat(document.getElementById('in-vol').value) || 0,
+    volg: parseFloat(document.getElementById('in-volg').value) || 0,
+    price: parseFloat(document.getElementById('in-price').value) || 0,
+    priceg: parseFloat(document.getElementById('in-priceg').value) || 0,
+    cogsPct: parseFloat(document.getElementById('in-cogs').value) || 0,
+    opexFix: parseFloat(document.getElementById('in-opexfix').value) || 0,
+    opexG: parseFloat(document.getElementById('in-opexg').value) || 0,
+    opexVarPct: parseFloat(document.getElementById('in-opexvar').value) || 0,
+  };
+}
+
+// ============================================================
+// CALCULATION ENGINE
+// ============================================================
+function computeModel(s, overrideWacc, overrideVolg){
+  const N = s.years;
+  const wacc = (overrideWacc !== undefined ? overrideWacc : s.wacc);
+  const volg = (overrideVolg !== undefined ? overrideVolg : s.volg);
+  const discountRate = (wacc + s.risk) / 100;
+
+  const years = [];
+  for(let y=1;y<=N;y++) years.push(y);
+
+  // Revenue & costs
+  const revenue = years.map(y => {
+    const vol = s.vol * Math.pow(1 + volg/100, y-1);
+    const price = s.price * Math.pow(1 + s.priceg/100, y-1);
+    return vol * price;
+  });
+  const cogs = revenue.map(r => r * s.cogsPct/100);
+  const grossProfit = revenue.map((r,i) => r - cogs[i]);
+  const opex = years.map((y,i) => s.opexFix * Math.pow(1 + s.opexG/100, y-1) + revenue[i]*s.opexVarPct/100);
+  const ebitda = grossProfit.map((gp,i) => gp - opex[i]);
+
+  // CapEx & depreciation
+  const capexByYear = years.map(y => capexItems.filter(it => it.yearAdded === y).reduce((a,it)=>a + it.qty*it.unitCost, 0));
+  const depByYear = years.map(y => capexItems.reduce((a,it)=>{
+    const cost = it.qty*it.unitCost;
+    const life = Math.max(1, it.life);
+    if(y >= it.yearAdded && y < it.yearAdded + life) return a + cost/life;
+    return a;
+  },0));
+
+  const nfa = [];
+  let nfaPrev = 0;
+  years.forEach((y,i)=>{ const v = nfaPrev + capexByYear[i] - depByYear[i]; nfa.push(v); nfaPrev = v; });
+
+  const ebit = ebitda.map((e,i)=> e - depByYear[i]);
+  const zakatAmt = ebit.map(e => Math.max(e,0) * s.zakat/100);
+  const netProfit = ebit.map((e,i)=> e - zakatAmt[i]);
+
+  // Working capital
+  const ar = revenue.map(r => r/365 * s.arDays);
+  const inv = cogs.map(c => c/365 * s.invDays);
+  const ap = cogs.map(c => c/365 * s.apDays);
+  const nwc = years.map((y,i)=> ar[i] + inv[i] - ap[i]);
+  const dNwc = years.map((y,i)=> nwc[i] - (i===0?0:nwc[i-1]));
+
+  // Simplified cash position (unlevered, equity-funded): opening equity covers any
+  // first-year shortfall, cash then accumulates with operating + investing flows.
+  const cfo = ebitda.map((e,i)=> e - zakatAmt[i] - dNwc[i]);
+  const cfi = capexByYear.map(c => -c);
+  const openingEquity = Math.max(0, -(cfo[0] + cfi[0]));
+  const cash = [];
+  let cashPrev = 0;
+  years.forEach((y,i)=>{
+    const v = cashPrev + cfo[i] + cfi[i] + (i===0 ? openingEquity : 0);
+    cash.push(v); cashPrev = v;
+  });
+
+  // Free cash flow & discounting
+  const fcf = ebitda.map((e,i)=> e - zakatAmt[i] - dNwc[i] - capexByYear[i]);
+  const df = years.map(y => 1/Math.pow(1+discountRate, y));
+  const dfcf = fcf.map((f,i)=> f*df[i]);
+  let cum = 0, cumArr = [];
+  fcf.forEach(f=>{ cum += f; cumArr.push(cum); });
+  let dcum = 0, dcumArr = [];
+  dfcf.forEach(f=>{ dcum += f; dcumArr.push(dcum); });
+
+  const npvExclTV = dfcf.reduce((a,b)=>a+b,0);
+  const lastFcf = fcf[fcf.length-1];
+  const g = s.growth/100;
+  let tv = 0;
+  if(discountRate > g) tv = lastFcf*(1+g) / (discountRate - g);
+  const pvTv = tv * df[df.length-1];
+  const npvInclTV = npvExclTV + pvTv;
+
+  // IRR: bracket the sign change over a wide range, then bisect for accuracy
+  function npvAt(r){ return fcf.reduce((a,f,i)=> a + f/Math.pow(1+r,i+1), 0); }
+  let irr = NaN;
+  {
+    const scanFrom = -0.95, scanTo = 5, steps = 400;
+    let prevR = scanFrom, prevF = npvAt(prevR);
+    let bracket = null;
+    for(let k=1;k<=steps;k++){
+      const r = scanFrom + (scanTo-scanFrom)*k/steps;
+      const f = npvAt(r);
+      if(isFinite(prevF) && isFinite(f) && ((prevF<0 && f>=0) || (prevF>0 && f<=0))){
+        bracket = [prevR, r]; break;
+      }
+      prevR = r; prevF = f;
+    }
+    if(bracket){
+      let [lo, hi] = bracket, flo = npvAt(lo);
+      for(let it=0; it<80; it++){
+        const mid = (lo+hi)/2, fmid = npvAt(mid);
+        if(Math.abs(fmid) < 1e-6) { lo=hi=mid; break; }
+        if((flo<0) === (fmid<0)) { lo=mid; flo=fmid; } else { hi=mid; }
+      }
+      irr = (lo+hi)/2;
+    }
+  }
+
+  // Payback (undiscounted, in years)
+  let payback = NaN;
+  for(let i=0;i<cumArr.length;i++){
+    if(cumArr[i] >= 0){
+      const prevCum = i===0?0:cumArr[i-1];
+      const frac = fcf[i] !== 0 ? (-prevCum)/fcf[i] : 0;
+      payback = i + Math.max(0,Math.min(1,frac));
+      break;
+    }
+  }
+
+  // ROIC (avg)
+  const roicArr = ebit.map((e,i)=>{
+    const ic = nfa[i] + nwc[i];
+    if(ic <= 0) return null;
+    return (e*(1-s.zakat/100)) / ic;
+  }).filter(v=>v!==null);
+  const roicAvg = roicArr.length ? roicArr.reduce((a,b)=>a+b,0)/roicArr.length : NaN;
+
+  const totalRevenue = revenue.reduce((a,b)=>a+b,0);
+  const grossMargin = totalRevenue>0 ? grossProfit.reduce((a,b)=>a+b,0)/totalRevenue : 0;
+  const ebitdaMargin = totalRevenue>0 ? ebitda.reduce((a,b)=>a+b,0)/totalRevenue : 0;
+  const netMargin = totalRevenue>0 ? netProfit.reduce((a,b)=>a+b,0)/totalRevenue : 0;
+
+  return {
+    years, revenue, cogs, grossProfit, opex, ebitda, capexByYear, depByYear, nfa, ebit, zakatAmt, netProfit,
+    ar, inv, ap, nwc, dNwc, fcf, df, dfcf, cumArr, dcumArr, npvExclTV, tv, pvTv, npvInclTV, irr, payback, roicAvg,
+    grossMargin, ebitdaMargin, netMargin, discountRate, totalRevenue, cash
+  };
+}
+
+// ============================================================
+// FORMATTING
+// ============================================================
+function fmt(n, d=0){ if(n===null||n===undefined||!isFinite(n)) return '—'; return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtPct(n, d=1){ if(n===null||n===undefined||!isFinite(n)) return '—'; return (n*100).toFixed(d)+'%'; }
+
+// ============================================================
+// RENDER: CAPEX ROWS
+// ============================================================
+function renderCapexRows(){
+  const wrap = document.getElementById('capex-rows');
+  wrap.innerHTML = '';
+  const s = readState();
+  if(capexItems.length===0){
+    wrap.innerHTML = '<p style="color:var(--muted); font-size:13px; padding:10px 0;">لا توجد بنود بعد — اضغط "إضافة بند رأسمالي" لبدء الإدخال.</p>';
+  }
+  capexItems.forEach(it=>{
+    const row = document.createElement('div');
+    row.className='capex-row';
+    row.innerHTML = `
+      <div class="field"><input type="text" value="${it.name}" data-id="${it.id}" data-f="name" placeholder="اسم الأصل"></div>
+      <div class="field"><input type="number" value="${it.qty}" data-id="${it.id}" data-f="qty"></div>
+      <div class="field"><input type="number" value="${it.unitCost}" data-id="${it.id}" data-f="unitCost"></div>
+      <div class="field"><input type="number" value="${it.life}" data-id="${it.id}" data-f="life" min="1"></div>
+      <div class="field"><select data-id="${it.id}" data-f="yearAdded">${optYears(s.years, it.yearAdded)}</select></div>
+      <div><button class="btn ghost" data-del="${it.id}">حذف</button></div>
+    `;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('input,select').forEach(el=>{
+    el.addEventListener('input', e=>{
+      const id = parseInt(e.target.dataset.id);
+      const f = e.target.dataset.f;
+      const item = capexItems.find(x=>x.id===id);
+      if(!item) return;
+      item[f] = (f==='name') ? e.target.value : parseFloat(e.target.value)||0;
+      recalcAll();
+    });
+  });
+  wrap.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const id = parseInt(e.target.dataset.del);
+      capexItems = capexItems.filter(x=>x.id!==id);
+      renderCapexRows();
+      recalcAll();
+    });
+  });
+}
+function optYears(n, selected){
+  let out='';
+  for(let y=1;y<=n;y++) out += `<option value="${y}" ${y===selected?'selected':''}>سنة ${y}</option>`;
+  return out;
+}
+
+document.getElementById('add-capex').addEventListener('click', ()=>{
+  capexItems.push({id: nextCapexId++, name:'بند جديد', qty:1, unitCost:0, life:5, yearAdded:1});
+  renderCapexRows();
+  recalcAll();
+});
+
+// ============================================================
+// RENDER: TABLES
+// ============================================================
+function yearHeaders(s){ return s.years===0?[]:Array.from({length:s.years},(_,i)=>s.startYear+i); }
+
+function buildTable(el, rows, s, opts={}){
+  const yh = yearHeaders(s);
+  let html = '<thead><tr><th>البند</th>';
+  yh.forEach(y=> html += `<th class="num">${y}</th>`);
+  html += '</tr></thead><tbody>';
+  rows.forEach(r=>{
+    html += `<tr class="${r.cls||''}"><td>${r.label}</td>`;
+    r.vals.forEach(v=> html += `<td class="num">${r.isPct ? fmtPct(v) : fmt(v, r.dec||0)}</td>`);
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  el.innerHTML = html;
+}
+
+function renderAll(){
+  const s = readState();
+  const m = computeModel(s);
+
+  // CapEx table
+  buildTable(document.getElementById('tbl-capex'), [
+    {label:'الإنفاق الرأسمالي', vals:m.capexByYear},
+    {label:'الإهلاك السنوي', vals:m.depByYear},
+    {label:'صافي الأصول الثابتة (نهاية السنة)', vals:m.nfa, cls:'total'},
+  ], s);
+
+  // Income statement
+  buildTable(document.getElementById('tbl-is'), [
+    {label:'الإيراد', vals:m.revenue},
+    {label:'تكلفة المبيعات (COGS)', vals:m.cogs, cls:'sub'},
+    {label:'مجمل الربح', vals:m.grossProfit, cls:'total'},
+    {label:'المصاريف التشغيلية', vals:m.opex, cls:'sub'},
+    {label:'EBITDA', vals:m.ebitda, cls:'total'},
+    {label:'الإهلاك', vals:m.depByYear, cls:'sub'},
+    {label:'EBIT', vals:m.ebit, cls:'total'},
+    {label:'الزكاة', vals:m.zakatAmt, cls:'sub'},
+    {label:'صافي الربح', vals:m.netProfit, cls:'total'},
+  ], s);
+
+  // Balance sheet (simplified)
+  buildTable(document.getElementById('tbl-bs'), [
+    {label:'الذمم المدينة (A/R)', vals:m.ar},
+    {label:'المخزون', vals:m.inv},
+    {label:'الذمم الدائنة (A/P)', vals:m.ap},
+    {label:'صافي رأس المال العامل', vals:m.nwc, cls:'total'},
+    {label:'صافي الأصول الثابتة', vals:m.nfa},
+  ], s);
+
+  // Cash flow
+  buildTable(document.getElementById('tbl-cf'), [
+    {label:'التدفق من العمليات', vals:m.ebitda.map((e,i)=>e - m.zakatAmt[i] - m.dNwc[i])},
+    {label:'التدفق من الاستثمار (رأسمالي)', vals:m.capexByYear.map(v=>-v)},
+    {label:'صافي التدفق النقدي التراكمي', vals:m.cumArr, cls:'total'},
+  ], s);
+
+  // FCF & PV table
+  buildTable(document.getElementById('tbl-fcf'), [
+    {label:'EBITDA', vals:m.ebitda},
+    {label:'ناقص: الزكاة', vals:m.zakatAmt.map(v=>-v), cls:'sub'},
+    {label:'ناقص: الاستثمار في رأس المال العامل', vals:m.dNwc.map(v=>-v), cls:'sub'},
+    {label:'ناقص: الإنفاق الرأسمالي', vals:m.capexByYear.map(v=>-v), cls:'sub'},
+    {label:'التدفق النقدي الحر (FCF)', vals:m.fcf, cls:'total'},
+    {label:'عامل الخصم', vals:m.df, dec:3},
+    {label:'التدفق النقدي المخصوم', vals:m.dfcf},
+    {label:'التدفق التراكمي المخصوم', vals:m.dcumArr, cls:'total'},
+  ], s);
+
+  // Metrics
+  const grid = document.getElementById('metric-grid');
+  const npvPos = m.npvInclTV >= 0;
+  const irrOk = isFinite(m.irr) && m.irr > m.discountRate;
+  grid.innerHTML = `
+    <div class="metric-card ${npvPos?'pos':'neg'}"><div class="m-lbl">صافي القيمة الحالية (شامل القيمة النهائية)</div><div class="m-val num">${fmt(m.npvInclTV)} ${s.currency}</div></div>
+    <div class="metric-card ${irrOk?'pos':'neg'}"><div class="m-lbl">معدل العائد الداخلي IRR</div><div class="m-val num">${isFinite(m.irr)?fmtPct(m.irr):'—'}</div></div>
+    <div class="metric-card"><div class="m-lbl">معدل الخصم المستخدم</div><div class="m-val num">${fmtPct(m.discountRate)}</div></div>
+    <div class="metric-card"><div class="m-lbl">فترة الاسترداد (بالسنوات)</div><div class="m-val num">${isFinite(m.payback)?m.payback.toFixed(2):'لم تُسترد خلال الفترة'}</div></div>
+    <div class="metric-card"><div class="m-lbl">متوسط العائد على رأس المال المستثمر (ROIC)</div><div class="m-val num">${fmtPct(m.roicAvg)}</div></div>
+    <div class="metric-card"><div class="m-lbl">القيمة النهائية (PV of TV)</div><div class="m-val num">${fmt(m.pvTv)} ${s.currency}</div></div>
+    <div class="metric-card"><div class="m-lbl">هامش مجمل الربح (تراكمي)</div><div class="m-val num">${fmtPct(m.grossMargin)}</div></div>
+    <div class="metric-card"><div class="m-lbl">هامش EBITDA (تراكمي)</div><div class="m-val num">${fmtPct(m.ebitdaMargin)}</div></div>
+  `;
+
+  // Hero
+  document.getElementById('hero-npv').textContent = fmt(m.npvInclTV) + ' ' + s.currency;
+  document.getElementById('hero-irr').textContent = isFinite(m.irr) ? fmtPct(m.irr) : '—';
+  document.getElementById('hero-payback').textContent = isFinite(m.payback) ? m.payback.toFixed(1)+' سنة' : '—';
+  document.getElementById('hero-rev').textContent = fmt(m.totalRevenue) + ' ' + s.currency;
+  document.getElementById('hero-npv').className = 'val num ' + (npvPos?'pos':'neg');
+
+  // Stamp
+  const stamp = document.getElementById('stamp');
+  const decision = npvPos && irrOk;
+  stamp.className = 'stamp ' + (decision ? 'go' : 'nogo');
+  stamp.innerHTML = decision ? 'GO<small>يستحق الاستثمار</small>' : 'NO GO<small>يحتاج مراجعة</small>';
+
+  // Chart
+  drawChart(m, s);
+
+  // Sensitivity
+  renderSensitivity(s);
+}
+
+function drawChart(m, s){
+  const svg = document.getElementById('chart');
+  const W=900,H=320,padL=60,padR=20,padT=20,padB=40;
+  const n = m.years.length;
+  if(n===0){ svg.innerHTML=''; return; }
+  const all = [...m.revenue, ...m.ebitda, ...m.fcf];
+  let maxV = Math.max(0,...all), minV = Math.min(0,...all);
+  if(maxV===minV){ maxV+=1; }
+  const range = maxV-minV;
+  const x = i => padL + (i/(Math.max(1,n-1))) * (W-padL-padR);
+  const y = v => padT + (1 - (v-minV)/range) * (H-padT-padB);
+  const zeroY = y(0);
+
+  function path(arr, color){
+    let d = arr.map((v,i)=> (i===0?'M':'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+    return `<path d="${d}" fill="none" stroke="${color}" stroke-width="2.5"/>` +
+      arr.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${color}"/>`).join('');
+  }
+
+  let html = '';
+  html += `<line x1="${padL}" y1="${zeroY}" x2="${W-padR}" y2="${zeroY}" stroke="#D9CFB4" stroke-width="1"/>`;
+  // y axis labels
+  html += `<text x="${padL-8}" y="${padT+4}" text-anchor="end" font-size="11" fill="#6B6252">${fmt(maxV)}</text>`;
+  html += `<text x="${padL-8}" y="${H-padB+4}" text-anchor="end" font-size="11" fill="#6B6252">${fmt(minV)}</text>`;
+  // x axis labels
+  m.years.forEach((yr,i)=>{
+    html += `<text x="${x(i).toFixed(1)}" y="${H-padB+18}" text-anchor="middle" font-size="11" fill="#6B6252">${s.startYear + yr - 1}</text>`;
+  });
+  html += path(m.revenue, '#C9A24B');
+  html += path(m.ebitda, '#2C6357');
+  html += path(m.fcf, '#AE4A3A');
+  svg.innerHTML = html;
+}
+
+function renderSensitivity(s){
+  const el = document.getElementById('tbl-sens');
+  const waccOffsets = [-2,-1,0,1,2];
+  const volgOffsets = [-10,-5,0,5,10];
+  let html = '<thead><tr><th>WACC \\ نمو الحجم</th>';
+  volgOffsets.forEach(o=> html += `<th class="num">${(s.volg+o).toFixed(1)}%</th>`);
+  html += '</tr></thead><tbody>';
+  waccOffsets.forEach(wo=>{
+    const waccVal = s.wacc + wo;
+    html += `<tr><td>${waccVal.toFixed(1)}%</td>`;
+    volgOffsets.forEach(vo=>{
+      const m = computeModel(s, waccVal, s.volg+vo);
+      const isBase = (wo===0 && vo===0);
+      const color = m.npvInclTV>=0 ? 'color:#2C6357;' : 'color:#AE4A3A;';
+      html += `<td class="num ${isBase?'base':''}" style="${color}">${fmt(m.npvInclTV)}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  el.innerHTML = html;
+}
+
+function recalcAll(){
+  renderAll();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ============================================================
+// INPUT LISTENERS
+// ============================================================
+document.querySelectorAll('input, select').forEach(el=>{
+  if(el.closest('#capex-rows')) return;
+  el.addEventListener('input', ()=>{
+    renderCapexRows(); // year dropdown depends on years count
+    recalcAll();
+  });
+});
+
+// init
+renderCapexRows();
+renderAll();
+</script>
+</body>
+</html>
